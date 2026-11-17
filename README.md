@@ -8,9 +8,10 @@ Keep your wins and the kind words people have said to you, your cookies, in a ja
 
 - **Put a cookie in.** A compliment, a result, a thank-you, something you are proud of. You can add who said it, when, and what kind of cookie it is. All three are optional.
 - **Take a cookie.** The jar hands you one at random.
+- **Keep separate jars.** One for teaching, one for family, one for running. Each jar has its own name and its own cookies. Switch between them at the top of the page.
 - **See everything.** All your cookies on one page, newest first, with filters by kind.
-- **Save a copy of your jar.** One small backup file that you keep yourself.
-- **Put saved cookies back in.** Load a backup file after losing your jar, on a new device, or when someone sends you their cookies. Cookies are added to the jar. Nothing is replaced.
+- **Save a copy.** One small backup file that you keep yourself, for one jar or for all of them.
+- **Put saved cookies back in.** Load a backup file after losing your jar, on a new device, or when someone sends you their cookies. You choose whether the cookies go into the jar that is open or into a new jar of their own. Nothing is replaced.
 
 ## Privacy
 
@@ -47,7 +48,7 @@ Download this repository (Code, then Download ZIP), unzip it, and double-click `
 
 ## How it is built
 
-Plain HTML, CSS and JavaScript. The app is `index.html`. Three small extras make it installable on a phone: `manifest.webmanifest` (name and icon), `icons`, and `sw.js` (keeps a copy of the app's files on the device so it opens offline; it never touches your cookies). There is nothing to build. Your cookies are kept in the browser's local storage under the key `cookie-jar-v1`. A backup is a JSON file.
+Plain HTML, CSS and JavaScript. The app is `index.html`. Three small extras make it installable on a phone: `manifest.webmanifest` (name and icon), `icons`, and `sw.js` (keeps a copy of the app's files on the device so it opens offline; it never touches your cookies). There is nothing to build. Your jars are kept in the browser's local storage under the key `cookie-jar-v2` (a jar made with the first version, stored under `cookie-jar-v1`, is carried over automatically). A backup is a JSON file.
 
 To run it on your own address, copy all the files to any web host that uses https.
 
