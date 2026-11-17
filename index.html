@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cookie Jar</title>
+<meta name="description" content="Keep your wins and kind words in a jar. Private, in your browser, no sign-in.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#E4EFF1">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Cookie Jar">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
 /* Fonts are served from this site's own fonts folder, so no other company is contacted. */
 @font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:200 800;font-display:swap;src:url("fonts/bricolage-grotesque-latin-wght-normal.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -244,6 +251,7 @@ footer p+p{margin-top:8px}
 <footer>
   <div class="wrap">
     <p>Cookie Jar is free and open source. It has no server and no tracking. Your cookies are stored by your browser on this device and nowhere else. If you clear your browser data, the jar is emptied, so keep a backup.</p>
+    <p><b>Put it on your phone.</b> On an iPhone, open this page in Safari, tap the Share button, then "Add to Home Screen". On Android, open it in Chrome, tap the menu, then "Add to Home screen" or "Install app". The jar then opens from its own icon and works without a connection. A jar on your phone is separate from a jar on your computer; use a backup file to move cookies between them.</p>
     <p>A jar often holds other people's words. Keep it for yourself unless they would be happy to see it shared.</p>
   </div>
 </footer>
@@ -442,6 +450,12 @@ $("wipe").addEventListener("click",function(){
   state.cookies=[]; persist(); order=[]; taken=0; renderAll(); showSlip(EXAMPLES[0],false);
   flash("wipe-msg","The jar is empty.");
 });
+
+/* keep working offline, and ask the browser not to clear the jar when space runs low */
+if("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && window.self===window.top){
+  window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});
+}
+try{if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(function(){});}}catch(e){}
 
 /* start */
 load();
