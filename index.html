@@ -110,6 +110,22 @@ form.add{background:var(--paper);border-radius:8px;padding:24px;margin-top:20px;
 .card:nth-child(5n+3) cite,.card:nth-child(5n+3) .link{color:#5C4708}
 .empty{margin-top:18px;color:var(--muted)}
 
+/* jar tabs */
+.jars{background:var(--shelf);padding:12px 0}
+.jar-tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.jar-tab{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:7px 16px;font-size:15px;font-weight:600;max-width:100%}
+.jar-tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jar-tab small{font-size:12px;font-weight:800;background:var(--paper);color:var(--ink);border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums}
+.jar-tab[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.jar-tab.add{border-style:dashed;color:var(--muted);border-color:var(--muted)}
+.inline-form{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.inline-form input[type=text]{width:auto;flex:1 1 200px;max-width:320px}
+.inline-form .btn{padding:9px 18px;box-shadow:0 3px 0 var(--jam-deep)}
+.inline-form .btn.quiet{box-shadow:0 0 0 2px var(--ink) inset}
+.where{border:0;padding:0;margin:14px 0 0}
+.where legend{font-size:14px;font-weight:600;color:var(--muted);padding:0;margin-bottom:6px}
+.where label{display:flex;gap:8px;align-items:center;font-size:15.5px;font-weight:400;color:var(--ink);margin:0 0 4px}
+.manage{display:flex;gap:8px 22px;flex-wrap:wrap;align-items:center;margin-top:22px}
 /* backup */
 .backup{background:var(--shelf);margin-top:26px;padding:6px 0 44px}
 .backup-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
@@ -132,12 +148,24 @@ footer p+p{margin-top:8px}
 @media (prefers-reduced-motion:reduce){.slip.pop{animation:none}.btn{transition:none}}
 @media print{
   body{background:#fff}
-  .private,.warn,.panel.add-panel,.backup,.jar-row,.chips,.link,footer{display:none !important}
+  .jars,.private,.warn,.panel.add-panel,.backup,.jar-row,.chips,.link,footer{display:none !important}
   .slip,.card{box-shadow:none;border:1px solid #bbb;transform:none}
 }
 </style>
 </head>
 <body>
+
+<nav class="jars" aria-label="Your jars">
+  <div class="wrap">
+    <div class="jar-tabs" id="jar-tabs"></div>
+    <form class="inline-form" id="new-jar" hidden novalidate>
+      <label for="new-jar-name" style="margin:0">Name the new jar</label>
+      <input type="text" id="new-jar-name" maxlength="30" placeholder="Teaching, Family, Running" autocomplete="off">
+      <button class="btn" type="submit">Create jar</button>
+      <button class="btn quiet" type="button" id="new-jar-cancel">Cancel</button>
+    </form>
+  </div>
+</nav>
 
 <header class="hero">
   <div class="wrap hero-grid">
@@ -177,7 +205,7 @@ footer p+p{margin-top:8px}
   <div class="wrap">
     <p><b>Private by design.</b> Everything you add stays in this browser, on this device. Nothing is sent to a server. There are no accounts.</p>
     <div>
-      <label for="owner" style="color:#C9DADD">Whose jar is this?</label>
+      <label for="owner" style="color:#C9DADD">Your name (optional)</label>
       <input type="text" id="owner" maxlength="40" placeholder="Your first name" autocomplete="off" style="width:220px">
     </div>
   </div>
@@ -186,7 +214,7 @@ footer p+p{margin-top:8px}
 <main>
   <section class="panel add-panel">
     <div class="wrap">
-      <div class="panel-head"><h2>Put a cookie in</h2><p class="note">A compliment, a result, a thank-you, something you are proud of.</p></div>
+      <div class="panel-head"><h2 id="add-title">Put a cookie in</h2><p class="note">A compliment, a result, a thank-you, something you are proud of.</p></div>
       <form class="add" id="add" novalidate>
         <div>
           <label for="f-text">The words, or the win</label>
@@ -207,7 +235,7 @@ footer p+p{margin-top:8px}
 
   <section class="panel">
     <div class="wrap">
-      <div class="panel-head"><h2>Everything in the jar</h2><p class="note" id="wall-note"></p></div>
+      <div class="panel-head"><h2 id="wall-title">Everything in the jar</h2><p class="note" id="wall-note"></p></div>
       <div class="chips" id="chips"></div>
       <div class="cols" id="wall"></div>
     </div>
@@ -217,20 +245,27 @@ footer p+p{margin-top:8px}
 <section class="backup">
   <div class="wrap">
     <div class="panel" style="padding-top:34px">
-      <div class="panel-head"><h2>Keep it safe</h2><p class="note">The jar lives in this browser only. A backup file is a spare copy you keep yourself.</p></div>
+      <div class="panel-head"><h2>Keep it safe</h2><p class="note">Your jars live in this browser only. A backup file is a spare copy you keep yourself.</p></div>
       <div class="backup-grid">
         <div class="box">
-          <h3>Save a copy of your jar</h3>
-          <p>Downloads one small file holding every cookie in the jar. Keep it wherever you keep important files. Your jar here stays as it is.</p>
+          <h3>Save a copy</h3>
+          <p>Downloads one small file holding every cookie in the jar that is open. Keep it wherever you keep important files. Your jar here stays as it is.</p>
           <div class="actions">
             <button class="btn" type="button" id="save">Save backup file</button>
+            <button class="btn quiet" type="button" id="save-all" hidden>Save all jars</button>
             <button class="btn quiet" type="button" id="copy">Copy as text</button>
             <span class="msg" id="save-msg" role="status"></span>
           </div>
         </div>
         <div class="box">
           <h3>Put saved cookies back in</h3>
-          <p>Use this after losing your jar, on a new device, or when someone sends you their cookies. The cookies in the file are added to this jar. Nothing already here is removed or replaced, and a cookie you already have is not added twice.</p>
+          <p>Use this after losing your jar, on a new device, or when someone sends you their cookies. The cookies in the file are added. Nothing already here is removed or replaced, and a cookie you already have is not added twice.</p>
+          <fieldset class="where">
+            <legend>Where should the cookies go?</legend>
+            <label><input type="radio" name="where" id="where-open" checked> <span id="where-open-label">The jar that is open</span></label>
+            <label><input type="radio" name="where" id="where-new"> <span>A new jar of their own</span></label>
+          </fieldset>
+          <p style="font-size:14px">A backup of all your jars puts each one back under its own name.</p>
           <div class="actions">
             <label for="file" style="margin:0">Backup file</label>
             <input type="file" id="file" accept=".json,application/json,text/plain">
@@ -243,14 +278,25 @@ footer p+p{margin-top:8px}
           </div>
         </div>
       </div>
-      <p style="margin-top:22px"><button class="link danger" type="button" id="wipe">Empty the jar on this device</button> <span class="msg" id="wipe-msg" role="status"></span></p>
+      <div class="manage">
+        <button class="link" type="button" id="rename-open">Rename this jar</button>
+        <button class="link danger" type="button" id="wipe">Empty this jar</button>
+        <button class="link danger" type="button" id="delete-jar" hidden>Delete this jar</button>
+        <span class="msg" id="wipe-msg" role="status"></span>
+      </div>
+      <form class="inline-form" id="rename" hidden novalidate>
+        <label for="rename-name" style="margin:0">New name</label>
+        <input type="text" id="rename-name" maxlength="30" autocomplete="off">
+        <button class="btn" type="submit">Save name</button>
+        <button class="btn quiet" type="button" id="rename-cancel">Cancel</button>
+      </form>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    <p>Cookie Jar is free and open source. It has no server and no tracking. Your cookies are stored by your browser on this device and nowhere else. If you clear your browser data, the jar is emptied, so keep a backup.</p>
+    <p>Cookie Jar is free and open source. It has no server and no tracking. Your cookies are stored by your browser on this device and nowhere else. If you clear your browser data, your jars are emptied, so keep a backup.</p>
     <p><b>Put it on your phone.</b> On an iPhone, open this page in Safari, tap the Share button, then "Add to Home Screen". On Android, open it in Chrome, tap the menu, then "Add to Home screen" or "Install app". The jar then opens from its own icon and works without a connection. A jar on your phone is separate from a jar on your computer; use a backup file to move cookies between them.</p>
     <p>A jar often holds other people's words. Keep it for yourself unless they would be happy to see it shared.</p>
   </div>
@@ -259,7 +305,7 @@ footer p+p{margin-top:8px}
 <script>
 (function(){
 "use strict";
-var KEY="cookie-jar-v1";
+var KEY="cookie-jar-v2", OLD_KEY="cookie-jar-v1";
 var EXAMPLES=[
  {text:"Your talk was the first time I understood what our team actually does.", from:"A colleague, after the all-hands", tag:"Example"},
  {text:"Passed the driving test. Third try.", from:"Me", tag:"Example"},
@@ -269,48 +315,104 @@ var EXAMPLES=[
  {text:"This is the best soup in the world.", from:"My daughter, aged 6", tag:"Example"}
 ];
 
-var state={version:1, owner:"", cookies:[]};
+var state={version:2, owner:"", activeId:"", jars:[]};
 var canStore=true, filter=null, order=[], taken=0, armed={};
 
 function $(id){return document.getElementById(id);}
 function el(tag,cls,text){var e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e;}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function clean(s,max){return (typeof s==="string"?s:"").replace(/\r\n/g,"\n").trim().slice(0,max);}
+function plural(n){return n+(n===1?" cookie":" cookies");}
 
-function load(){
-  try{
-    var raw=localStorage.getItem(KEY);
-    if(raw){var d=JSON.parse(raw); if(d&&Array.isArray(d.cookies)){state.owner=clean(d.owner,40); state.cookies=d.cookies.map(norm).filter(Boolean);}}
-    localStorage.setItem(KEY+"-test","1"); localStorage.removeItem(KEY+"-test");
-  }catch(e){canStore=false;}
-}
-function persist(){
-  if(!canStore) return;
-  try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){canStore=false; $("warn").hidden=false;}
-}
-function norm(c){
+/* jars */
+function normCookie(c){
   if(!c||typeof c!=="object") return null;
   var text=clean(c.text,2000); if(!text) return null;
   var date=clean(c.date,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) date="";
   return {id:clean(c.id,40)||uid(), text:text, from:clean(c.from,80), date:date, tag:clean(c.tag,30), added:clean(c.added,30)||new Date().toISOString()};
 }
-function pool(){return state.cookies.length?state.cookies:EXAMPLES;}
+function normJar(j){
+  if(!j||typeof j!=="object") return null;
+  var list=Array.isArray(j.cookies)?j.cookies.map(normCookie).filter(Boolean):[];
+  return {id:clean(j.id,40)||uid(), name:clean(j.name,30)||"My jar", cookies:list};
+}
+function jarByName(name){
+  var n=name.toLowerCase();
+  for(var i=0;i<state.jars.length;i++){if(state.jars[i].name.toLowerCase()===n) return state.jars[i];}
+  return null;
+}
+function freeName(name){
+  var base=clean(name,26)||"New jar", candidate=base, n=2;
+  while(jarByName(candidate)){candidate=base+" "+n; n++;}
+  return candidate;
+}
+function newJar(name){var j={id:uid(), name:freeName(name), cookies:[]}; state.jars.push(j); return j;}
+function jar(){
+  for(var i=0;i<state.jars.length;i++){if(state.jars[i].id===state.activeId) return state.jars[i];}
+  if(!state.jars.length) newJar("My jar");
+  state.activeId=state.jars[0].id; return state.jars[0];
+}
+function openJar(j){state.activeId=j.id; filter=null; order=[]; armed={}; resetManage(); persist(); renderAll(); showSlip(pool()[0],false);}
+
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){
+      var d=JSON.parse(raw);
+      if(d&&Array.isArray(d.jars)){state.owner=clean(d.owner,40); state.jars=d.jars.map(normJar).filter(Boolean); state.activeId=clean(d.activeId,40);}
+    }else{
+      var old=localStorage.getItem(OLD_KEY);              /* jar made with the first version of the app */
+      if(old){
+        var o=JSON.parse(old);
+        if(o&&Array.isArray(o.cookies)){state.owner=clean(o.owner,40); var j=normJar({name:"My jar", cookies:o.cookies}); state.jars=[j]; state.activeId=j.id;}
+      }
+    }
+    localStorage.setItem(KEY+"-test","1"); localStorage.removeItem(KEY+"-test");
+  }catch(e){canStore=false;}
+  jar();
+  if(canStore) persist();
+}
+function persist(){
+  if(!canStore) return;
+  try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){canStore=false; $("warn").hidden=false;}
+}
+function pool(){var c=jar().cookies; return c.length?c:EXAMPLES;}
 function niceDate(d){
   if(!d) return "";
   var p=d.split("-"), dt=new Date(+p[0],+p[1]-1,+p[2]);
   try{return dt.toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});}catch(e){return d;}
 }
 function credit(c){return [c.from,niceDate(c.date)].filter(Boolean).join(" · ");}
-function flash(id,text){var m=$(id); m.textContent=text; if(text) setTimeout(function(){if(m.textContent===text) m.textContent="";},5000);}
+function flash(id,text){var m=$(id); m.textContent=text; if(text) setTimeout(function(){if(m.textContent===text) m.textContent="";},6000);}
 
-/* title */
+/* title and jar tabs */
 function renderTitle(){
   var h=$("title"); h.textContent="";
-  var name=state.owner;
-  h.appendChild(document.createTextNode(name?(name+(/s$/i.test(name)?"’ ":"’s ")):"The "));
-  h.appendChild(el("em",null,"cookie jar"));
-  document.title=name?(name+(/s$/i.test(name)?"’":"’s")+" Cookie Jar"):"Cookie Jar";
+  var name=state.owner, poss=name?(name+(/s$/i.test(name)?"’":"’s")):"";
+  h.appendChild(document.createTextNode(name?poss+" ":"The "));
+  h.appendChild(el("em",null,state.jars.length>1?"cookie jars":"cookie jar"));
+  document.title=name?poss+" Cookie Jar":"Cookie Jar";
 }
+function renderTabs(){
+  var box=$("jar-tabs"); box.textContent="";
+  state.jars.forEach(function(j){
+    var b=el("button","jar-tab"); b.type="button"; b.setAttribute("aria-pressed",String(j.id===state.activeId));
+    b.appendChild(el("span",null,j.name)); b.appendChild(el("small",null,String(j.cookies.length)));
+    b.setAttribute("aria-label",j.name+", "+plural(j.cookies.length));
+    b.addEventListener("click",function(){if(j.id!==state.activeId) openJar(j);});
+    box.appendChild(b);
+  });
+  var add=el("button","jar-tab add","+ New jar"); add.type="button";
+  add.addEventListener("click",function(){$("new-jar").hidden=false; $("new-jar-name").focus();});
+  box.appendChild(add);
+}
+$("new-jar").addEventListener("submit",function(e){
+  e.preventDefault();
+  var name=clean($("new-jar-name").value,30);
+  if(!name){$("new-jar-name").focus(); return;}
+  var j=newJar(name); $("new-jar-name").value=""; $("new-jar").hidden=true; openJar(j);
+});
+$("new-jar-cancel").addEventListener("click",function(){$("new-jar-name").value=""; $("new-jar").hidden=true;});
 
 /* slip */
 function showSlip(c,animate){
@@ -324,14 +426,14 @@ function reshuffle(){
   for(var j=n-1;j>0;j--){var k=Math.floor(Math.random()*(j+1)), t=order[j]; order[j]=order[k]; order[k]=t;}
 }
 function renderCount(){
-  var n=state.cookies.length;
-  $("count").textContent=n?(n+(n===1?" cookie":" cookies")+" in the jar"+(taken?" · "+taken+" taken today":"")):"The jar is empty, so these are examples";
+  var n=jar().cookies.length, many=state.jars.length>1;
+  $("count").textContent=n?(plural(n)+" in "+(many?"“"+jar().name+"”":"the jar")+(taken?" · "+taken+" taken today":"")):"This jar is empty, so these are examples";
 }
 
 /* wall */
 function tagsInUse(){
   var seen={}, out=[];
-  state.cookies.forEach(function(c){var t=c.tag||""; if(t&&!seen[t.toLowerCase()]){seen[t.toLowerCase()]=1; out.push(t);}});
+  jar().cookies.forEach(function(c){var t=c.tag||""; if(t&&!seen[t.toLowerCase()]){seen[t.toLowerCase()]=1; out.push(t);}});
   return out.sort(function(a,b){return a.localeCompare(b);});
 }
 function renderChips(){
@@ -347,10 +449,11 @@ function renderChips(){
 }
 function renderWall(){
   var wall=$("wall"); wall.textContent="";
-  var mine=state.cookies.length>0;
-  var list=(mine?state.cookies.slice().sort(function(a,b){return (b.date||b.added.slice(0,10)).localeCompare(a.date||a.added.slice(0,10));}):EXAMPLES)
+  var J=jar(), mine=J.cookies.length>0;
+  var list=(mine?J.cookies.slice().sort(function(a,b){return (b.date||b.added.slice(0,10)).localeCompare(a.date||a.added.slice(0,10));}):EXAMPLES)
     .filter(function(c){return !filter||(c.tag||"").toLowerCase()===filter;});
-  $("wall-note").textContent=mine?"Newest first.":"These six are invented examples. They disappear when you add your first cookie.";
+  $("wall-title").textContent=state.jars.length>1?("Everything in “"+J.name+"”"):"Everything in the jar";
+  $("wall-note").textContent=mine?"Newest first.":"These six are invented examples. They disappear when you add your first cookie to this jar.";
   list.forEach(function(c){
     var f=el("figure","card"+(c.text.length<60?" short":"")); f.style.margin="0 0 20px";
     f.appendChild(el("blockquote",null,c.text));
@@ -360,7 +463,7 @@ function renderWall(){
     if(mine){
       var del=el("button","link",armed[c.id]?"Really remove?":"Remove"); del.type="button"; if(armed[c.id]) del.className="link danger";
       del.addEventListener("click",function(){
-        if(armed[c.id]){state.cookies=state.cookies.filter(function(x){return x.id!==c.id;}); delete armed[c.id]; persist(); order=[]; renderAll();}
+        if(armed[c.id]){J.cookies=J.cookies.filter(function(x){return x.id!==c.id;}); delete armed[c.id]; persist(); order=[]; renderAll();}
         else{armed={}; armed[c.id]=1; renderWall();}
       });
       row.appendChild(del);
@@ -368,14 +471,22 @@ function renderWall(){
     f.appendChild(row); wall.appendChild(f);
   });
 }
-function renderAll(){renderTitle(); renderCount(); renderChips(); renderWall();}
+function renderManage(){
+  var many=state.jars.length>1, J=jar();
+  $("add-title").textContent=many?("Put a cookie in “"+J.name+"”"):"Put a cookie in";
+  $("save").textContent=many?"Save this jar":"Save backup file";
+  $("save-all").hidden=!many;
+  $("where-open-label").textContent=many?("The open jar, “"+J.name+"”"):"The jar that is open";
+  $("delete-jar").hidden=!many;
+}
+function renderAll(){renderTitle(); renderTabs(); renderCount(); renderChips(); renderWall(); renderManage();}
 
 /* add */
 $("add").addEventListener("submit",function(e){
   e.preventDefault();
-  var c=norm({text:$("f-text").value, from:$("f-from").value, date:$("f-date").value, tag:$("f-tag").value});
+  var c=normCookie({text:$("f-text").value, from:$("f-from").value, date:$("f-date").value, tag:$("f-tag").value});
   if(!c){flash("add-msg","Write the words or the win first."); $("f-text").focus(); return;}
-  state.cookies.push(c); persist(); order=[];
+  jar().cookies.push(c); persist(); order=[];
   $("f-text").value=""; $("f-from").value=""; $("f-date").value="";
   renderAll(); showSlip(c,true);
   flash("add-msg",canStore?"Added. It is in the jar.":"Added, but this browser will not keep it. Save a backup.");
@@ -390,45 +501,84 @@ $("take").addEventListener("click",function(){
 /* owner */
 $("owner").addEventListener("input",function(){state.owner=clean(this.value,40); persist(); renderTitle();});
 
-/* backup */
-function backupText(){return JSON.stringify({app:"cookie-jar", version:1, exported:new Date().toISOString(), owner:state.owner, cookies:state.cookies},null,2);}
-function fileName(){return "cookie-jar-backup-"+new Date().toISOString().slice(0,10)+".json";}
-function plainDownload(text){
+/* backup: save */
+function stamp(){return new Date().toISOString();}
+function oneJarText(){var J=jar(); return JSON.stringify({app:"cookie-jar", version:2, exported:stamp(), owner:state.owner, jar:{name:J.name}, cookies:J.cookies},null,2);}
+function allJarsText(){return JSON.stringify({app:"cookie-jar", version:2, exported:stamp(), owner:state.owner, jars:state.jars.map(function(j){return {name:j.name, cookies:j.cookies};})},null,2);}
+function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"jar";}
+function fileName(all){return "cookie-jar-"+(all?"all-jars":slug(jar().name))+"-"+stamp().slice(0,10)+".json";}
+function plainDownload(text,name){
   var url=URL.createObjectURL(new Blob([text],{type:"application/json"}));
-  var a=document.createElement("a"); a.href=url; a.download=fileName(); document.body.appendChild(a); a.click(); a.remove();
+  var a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){URL.revokeObjectURL(url);},2000);
 }
 var hostDownloads=null;
 if(window.claude&&typeof window.claude.use==="function"){
   window.claude.use("downloads").then(function(d){hostDownloads=d;}).catch(function(){});
 }
-$("save").addEventListener("click",function(){
-  if(!state.cookies.length){flash("save-msg","The jar is empty. Add a cookie first."); return;}
-  var text=backupText();
+function saveFile(text,name){
   if(hostDownloads){
-    hostDownloads.save({filename:fileName(), data:text}).then(function(){flash("save-msg","Backup saved.");})
+    hostDownloads.save({filename:name, data:text}).then(function(){flash("save-msg","Backup saved.");})
       .catch(function(){flash("save-msg","The file was not saved. Use Copy as text and paste it into a note.");});
   }else{
-    try{plainDownload(text); flash("save-msg","Backup file created. If nothing downloaded, use Copy as text.");}
+    try{plainDownload(text,name); flash("save-msg","Backup file created. If nothing downloaded, use Copy as text.");}
     catch(e){flash("save-msg","This browser blocked the download. Use Copy as text.");}
   }
+}
+function total(){return state.jars.reduce(function(n,j){return n+j.cookies.length;},0);}
+$("save").addEventListener("click",function(){
+  if(!jar().cookies.length){flash("save-msg","This jar is empty. Add a cookie first."); return;}
+  saveFile(oneJarText(),fileName(false));
+});
+$("save-all").addEventListener("click",function(){
+  if(!total()){flash("save-msg","All your jars are empty."); return;}
+  saveFile(allJarsText(),fileName(true));
 });
 $("copy").addEventListener("click",function(){
-  if(!state.cookies.length){flash("save-msg","The jar is empty. Add a cookie first."); return;}
-  var text=backupText();
+  if(!jar().cookies.length){flash("save-msg","This jar is empty. Add a cookie first."); return;}
+  var text=oneJarText();
   function fallback(){$("paste").value=text; $("paste").focus(); $("paste").select(); flash("save-msg","Could not copy automatically. The text is in the box on the right: copy it from there.");}
   try{navigator.clipboard.writeText(text).then(function(){flash("save-msg","Copied. Paste it into a note or a file.");},fallback);}catch(e){fallback();}
 });
+
+/* backup: load */
+function addCookies(J,list){
+  var have={}, added=0; J.cookies.forEach(function(c){have[c.id]=1; have["t:"+c.text]=1;});
+  list.forEach(function(raw){var c=normCookie(raw); if(!c||have[c.id]||have["t:"+c.text]) return; have[c.id]=1; have["t:"+c.text]=1; J.cookies.push(c); added++;});
+  return added;
+}
 function merge(text){
   var d; try{d=JSON.parse(text);}catch(e){flash("load-msg","That is not a Cookie Jar backup. Nothing was changed."); return;}
-  var list=Array.isArray(d)?d:(d&&Array.isArray(d.cookies)?d.cookies:null);
-  if(!list){flash("load-msg","That is not a Cookie Jar backup. Nothing was changed."); return;}
-  var have={}; state.cookies.forEach(function(c){have[c.id]=1; have["t:"+c.text]=1;});
-  var added=0;
-  list.forEach(function(raw){var c=norm(raw); if(!c||have[c.id]||have["t:"+c.text]) return; have[c.id]=1; have["t:"+c.text]=1; state.cookies.push(c); added++;});
-  if(!state.owner&&d&&d.owner){state.owner=clean(d.owner,40); $("owner").value=state.owner;}
-  persist(); order=[]; renderAll();
-  flash("load-msg",added?("Added "+added+(added===1?" cookie":" cookies")+" to the jar."):"Every cookie in that backup is already in the jar.");
+  var bad="That is not a Cookie Jar backup. Nothing was changed.";
+  if(!d||typeof d!=="object"){flash("load-msg",bad); return;}
+  var added=0, msg;
+  if(Array.isArray(d.jars)){
+    /* a backup of several jars: each goes to the jar with the same name, or a new one */
+    var touched=0, lone=(state.jars.length===1&&!state.jars[0].cookies.length)?state.jars[0]:null;
+    d.jars.forEach(function(raw){
+      if(!raw||!Array.isArray(raw.cookies)) return;
+      var name=clean(raw.name,30)||"My jar", J=jarByName(name)||newJar(name);
+      added+=addCookies(J,raw.cookies); touched++;
+    });
+    if(!touched){flash("load-msg",bad); return;}
+    /* a brand-new, still empty jar steps aside for the jars coming back */
+    if(lone&&!lone.cookies.length&&state.jars.length>1){state.jars=state.jars.filter(function(j){return j!==lone;}); state.activeId=state.jars[0].id; filter=null; armed={};}
+    msg=added?("Added "+plural(added)+" across "+touched+(touched===1?" jar.":" jars.")):"Every cookie in that backup is already in your jars.";
+  }else{
+    var list=Array.isArray(d)?d:(Array.isArray(d.cookies)?d.cookies:null);
+    if(!list){flash("load-msg",bad); return;}
+    var target=jar();
+    if($("where-new").checked){
+      var probe=list.map(normCookie).filter(Boolean);
+      if(!probe.length){flash("load-msg","That backup has no cookies in it."); return;}
+      target=newJar((d.jar&&clean(d.jar.name,30))||"Loaded jar"); state.activeId=target.id; filter=null; armed={};
+    }
+    added=addCookies(target,list);
+    msg=added?("Added "+plural(added)+" to “"+target.name+"”."):"Every cookie in that backup is already in this jar.";
+  }
+  if(!state.owner&&d.owner){state.owner=clean(d.owner,40); $("owner").value=state.owner;}
+  persist(); order=[]; renderAll(); if(added) showSlip(pool()[0],false);
+  flash("load-msg",msg);
 }
 $("file").addEventListener("change",function(){
   var f=this.files&&this.files[0]; if(!f) return;
@@ -442,13 +592,36 @@ $("load-paste").addEventListener("click",function(){
   var t=$("paste").value.trim(); if(!t){flash("load-msg","Paste the backup text first."); return;}
   merge(t); $("paste").value="";
 });
-var wipeArmed=false;
+
+/* manage the open jar */
+var wipeArmed=false, deleteArmed=false;
+function resetManage(){
+  wipeArmed=false; deleteArmed=false;
+  $("wipe").textContent="Empty this jar"; $("delete-jar").textContent="Delete this jar"; $("rename").hidden=true;
+}
+$("rename-open").addEventListener("click",function(){$("rename").hidden=false; $("rename-name").value=jar().name; $("rename-name").focus(); $("rename-name").select();});
+$("rename-cancel").addEventListener("click",function(){$("rename").hidden=true;});
+$("rename").addEventListener("submit",function(e){
+  e.preventDefault();
+  var name=clean($("rename-name").value,30), J=jar();
+  if(!name){$("rename-name").focus(); return;}
+  var other=jarByName(name);
+  if(other&&other!==J){flash("wipe-msg","You already have a jar called “"+other.name+"”."); return;}
+  J.name=name; $("rename").hidden=true; persist(); renderAll(); flash("wipe-msg","Renamed.");
+});
 $("wipe").addEventListener("click",function(){
-  if(!state.cookies.length){flash("wipe-msg","The jar is already empty."); return;}
-  if(!wipeArmed){wipeArmed=true; this.textContent="Really empty it? This removes all "+state.cookies.length+" cookies from this device"; return;}
-  wipeArmed=false; this.textContent="Empty the jar on this device";
-  state.cookies=[]; persist(); order=[]; taken=0; renderAll(); showSlip(EXAMPLES[0],false);
+  var J=jar();
+  if(!J.cookies.length){flash("wipe-msg","This jar is already empty."); return;}
+  if(!wipeArmed){resetManage(); wipeArmed=true; this.textContent="Really empty it? This removes all "+plural(J.cookies.length)+" in “"+J.name+"” from this device"; return;}
+  J.cookies=[]; resetManage(); persist(); order=[]; renderAll(); showSlip(EXAMPLES[0],false);
   flash("wipe-msg","The jar is empty.");
+});
+$("delete-jar").addEventListener("click",function(){
+  var J=jar();
+  if(state.jars.length<2) return;
+  if(!deleteArmed){resetManage(); deleteArmed=true; this.textContent="Really delete “"+J.name+"” and its "+plural(J.cookies.length)+" from this device?"; return;}
+  state.jars=state.jars.filter(function(x){return x.id!==J.id;});
+  openJar(state.jars[0]); flash("wipe-msg","Deleted “"+J.name+"”.");
 });
 
 /* keep working offline, and ask the browser not to clear the jar when space runs low */
@@ -462,7 +635,7 @@ load();
 if(!canStore) $("warn").hidden=false;
 $("owner").value=state.owner;
 renderAll();
-showSlip(pool()[state.cookies.length?Math.floor(Math.random()*state.cookies.length):0],false);
+showSlip(pool()[jar().cookies.length?Math.floor(Math.random()*jar().cookies.length):0],false);
 })();
 </script>
 </body>
